@@ -8,7 +8,7 @@ module.exports = (server) => {
                     req.connection.remoteAddress;
         console.log('New client' + ip);
         ws.on('message', (message) => {             // 클라이언트로부터 받은 메세지
-            console.log(message);
+            console.log(message.toString());
         });
 
         ws.on('error', (err) => {

@@ -4,7 +4,7 @@ const session = require('express-session');
 const express = require('express');
 const app = express();
 
-const webSocket = require('/ws/socket');
+const webSocket = require('../ws/socket');
 
 app.set('port', process.env.PORT || 8085);
 
