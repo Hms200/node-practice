@@ -21,7 +21,7 @@ module.exports = (server) => {
         });
 
         ws.interval = setInterval(() => {      // 서버에서 보내는 메세지 3초마다.
-            if (ws.readyState === ws.OPEN){             // OPEN, CLOSE, CLOSINBG, CONNECTING
+            if (ws.readyState === ws.OPEN){             // OPEN, CLOSE, CLOSING, CONNECTING
                 ws.send('Message from server')
             }
         }, 3000);
