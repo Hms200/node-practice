@@ -14,8 +14,8 @@ dotenv.config();
 const app = express();
 
 // routes
-const postRoutes = require('./routes/posts');
-const userRoutes = require('./routes/users');
+const postRoutes = require('~/routes/posts');
+const userRoutes = require('~/routes/users');
 
 // model
 const User = require('./models/User');
@@ -43,7 +43,7 @@ passport.deserializeUser(User.deserializeUser());
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use('/public', express.static('/bbs/public'));
 
 // MongoDB Connection
 mongoose
