@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const passport = require('passport');
 const multer = require('multer');
+const isLoggedIn = require('../isLoggedIn')
 
 const router = express.Router();
 
@@ -24,27 +25,18 @@ const imageFilter = (req, file, callback) => {
 
 const uploade = multer({ storage: storage, fileFilter: imageFilter });
 
-// checking login
-const isLoggedIn = (req, res, next) => {
-    if(req.isAuthenticated()) {
-        return next();
-    }
-    req.flash('error', 'login please');
-    res.redirect('/bbs/user/login');
-};
-
 // router
 router.post('/bbs/user/register', uploade.single('image'), (req, res) => {
     if(
         req.body.username &&
-        req.body.firstname &&
-        req.body.lastname &&
+        req.body.firstName &&
+        req.body.lastName &&
         req.body.password
     ) {
         let newUser = new User({
             username: req.body.username,
-            firstName: req.body.firstname,
-            lastName: req.body.lastname
+            firstName: req.body.firstName,
+            lastName: req.body.lastName
         });
         if(req.file) {
             newUser.profile = `/bbs/public/${ req.file.filename }`
