@@ -143,3 +143,58 @@ router.post('/post/new', isLoggedIn, uploade.single('image'), (req, res) => {
     }
 });
 
+function createPost(newPost, req, res) {
+    Post.create(newPost, (err, post) => {
+        if(err) {
+            console.error(err);
+        } else {
+            req.user.posts.push(post._id);
+            req.user.save();
+            res.redirect('/');
+        }
+    });
+}
+
+router.get('/post/:id', isLoggedIn, (req, res) => {
+    Post.findById(req.params.id)
+        .populate('comments')
+        .exec((err, post) => {
+            if(err) {
+                console.error(err);
+                req.flash('error', 'an error occured finding this post');
+                res.redirect('back');
+            } else {
+                res.render('posts/show', { post: post });
+            }
+        });
+});
+
+router.post('/post/:id/comments/new', isLoggedIn, (req, res) => {
+    Post.findById(req.params.id, (err, post) => {
+        if(err) {
+            console.error(err);
+            req.flash('error', 'an error occured posting your comment');
+            res.redirect('back');
+        } else {
+            Comment.create({ comment: req.body.content }, (err, comment) => {
+                if(err) {
+                    console.error(err);
+                    req.flash('error', 'Something went wrong with posting your comment');
+                    res.redirect('back');
+                } else {
+                    comment.creator._id = req.user._id;
+                    comment.creator.firstName = req.user.firstName;
+                    comment.creator.lastName = req.user.lastName;
+                    comment.likes = 0;
+                    comment.save();
+                    post.comments.push(comment);
+                    post.save();
+                    req.flash('success', 'Successfully posted your comment');
+                    res.redirect('/post/' + post._id);
+                }
+            });
+        }
+    });
+});
+
+module.exports = router;
