@@ -2,7 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const passport = require('passport');
 const multer = require('multer');
-const isLoggedIn = require('../isLoggedIn')
+//const isLoggedIn = require('../isLoggedIn')
 
 const router = express.Router();
 
@@ -24,15 +24,25 @@ const imageFilter = (req, file, callback) => {
 };
 
 const uploade = multer({ storage: storage, fileFilter: imageFilter });
+//
+const isLoggedIn = (req, res, next) => {
+    if(req.isAuthenticated()) {
+        return next();
+    }
+    req.flash('error', 'login please');
+    res.redirect('/bbs/user/login');
+}
 
 // router
 router.post('/bbs/user/register', uploade.single('image'), (req, res) => {
+    console.log('bbs/user/register')
     if(
         req.body.username &&
         req.body.firstName &&
         req.body.lastName &&
         req.body.password
     ) {
+        console.log('regist new user')
         let newUser = new User({
             username: req.body.username,
             firstName: req.body.firstName,
@@ -45,6 +55,9 @@ router.post('/bbs/user/register', uploade.single('image'), (req, res) => {
             newUser.profile = process.env.DEFAULT_PROFILE_PIC;
             return createUser(newUser, req.body.password, req, res);
         }
+    } else {
+        console.log('no information');
+        res.send('no data');
     }
 });
 
@@ -53,30 +66,30 @@ function createUser(newUser, password, req, res) {
     User.register(newUser, password, (err, user) => {
         if(err) {
             req.flash('error', err.message);
-            res.redirect('/');
+            res.send('error occured');
         } else {
             passport.authenticate('local', { failureRedirect: '/' }, function (req, res){
                 console.log(req.user);
                 req.flash('success', 'logged in!');
-                res.redirect('/');
+                res.send('success. logged in');
             });
         }
     });
 }
 
 // login
-router.get('/user/login', (req, res) => {
+router.get('bbs/user/login', (req, res) => {
     res.render('users/login');
 });
 
-router.post('/user/login',
+router.post('bbs/user/login',
             passport.authenticate('local', { successRedirect: '/', failureRedirect: '/' },
             function (req, res) {}),
             (req, res) => {}
             );
 
 // all users
-router.get('/user/all', isLoggedIn, (req, res) => {
+router.get('bbs/user/all', isLoggedIn, (req, res) => {
     User.find({}, (err, users) => {
         if(err) {
             console.error(err);
@@ -89,13 +102,13 @@ router.get('/user/all', isLoggedIn, (req, res) => {
 });
 
 // logout
-router.get('/user/logout', (req, res) => {
+router.get('bbs/user/logout', (req, res) => {
     req.logout();
     res.redirect('back')
 });
 
 // user profile
-router.get('/user/:id/profile', isLoggedIn, (req, res) => {
+router.get('bbs/user/:id/profile', isLoggedIn, (req, res) => {
     User.findById(req.params.id)
         .populate('friends')
         .populate('friendRequests')
@@ -113,7 +126,7 @@ router.get('/user/:id/profile', isLoggedIn, (req, res) => {
 })
 
 // add friend
-router.get('/user/:id/add', isLoggedIn, (req, res) => {
+router.get('bbs/user/:id/add', isLoggedIn, (req, res) => {
     User.findById(req.user._id, (err, user) => {
         if(err) {
             console.error(err);
@@ -150,7 +163,7 @@ router.get('/user/:id/add', isLoggedIn, (req, res) => {
 });
 
 // accept request
-router.get('/user/:id/accept', isLoggedIn, (req, res) => {
+router.get('bbs/user/:id/accept', isLoggedIn, (req, res) => {
     User.findById(req.user._id, (err, user) => {
         if(err) {
             console.error(err);
@@ -189,7 +202,7 @@ router.get('/user/:id/accept', isLoggedIn, (req, res) => {
 });
 
 // decline friend request
-router.get('/user/:id/decline', isLoggedIn, (req, res) => {
+router.get('bbs/user/:id/decline', isLoggedIn, (req, res) => {
     User.findById(req.user._id, (err, user) => {
         if(err) {
             console.error(err);

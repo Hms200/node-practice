@@ -6,4 +6,4 @@ const isLoggedIn = (req, res, next) => {
     res.redirect('/bbs/user/login');
 }
 
-export default isLoggedIn
+module.export = isLoggedIn

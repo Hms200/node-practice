@@ -3,7 +3,7 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const Comment = require('../models/Comment');
 const multer = require('multer');
-const isLoggedIn = require('../isLoggedIn')
+//const isLoggedIn = require('../isLoggedIn')
 
 const router = express.Router();
 
@@ -25,10 +25,21 @@ const imageFilter = (req, file, callback) => {
 };
 
 const uploade = multer({ storage: storage, fileFilter: imageFilter });
+//
+
+const isLoggedIn = (req, res, next) => {
+    console.log('checking login')
+    if(req.isAuthenticated()) {
+        return next();
+    }
+    req.flash('error', 'login please');
+    res.redirect('/bbs/user/login');
+}
 
 
 // router
-router.get('/', isLoggedIn, (req, res) => {
+router.get('/',  (req, res) => {
+    console.log('/');
     User.findById(req.user._id)         // 친구 게시글
         .populate({
             path: 'friends',

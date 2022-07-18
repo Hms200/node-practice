@@ -7,15 +7,16 @@ const LocalStrategy = require('passport-local');
 const socket = require('socket.io');
 const dotenv = require('dotenv');
 const flash = require('connect-flash');
+const morgan = require('morgan');
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8085;
 dotenv.config();
 const app = express();
 
 // routes
-const postRoutes = require('~/routes/posts');
-const userRoutes = require('~/routes/users');
+const postRoutes = require('./routes/posts');
+const userRoutes = require('./routes/users');
 
 // model
 const User = require('./models/User');
@@ -32,6 +33,7 @@ app.use(session({
     saveUninitialized: false,
 }));
 app.use(flash());
+app.use(morgan('combined'));
 
 // passport
 app.use(passport.initialize());
@@ -49,7 +51,6 @@ app.use('/public', express.static('/bbs/public'));
 mongoose
     .connect('mongodb://root:example@localhost:27017/roadbook?authSource=admin', {
         useNewUrlParser: true,
-        useCreateIndex: true,
         useUnifiedTopology: true,
     })
     .then(() => {
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
     res.locals.login = req.isAuthenticated();
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
+    next();
 });
 
 // routers
@@ -72,7 +74,7 @@ app.use('/', userRoutes);
 app.use('/', postRoutes);
 
 const server = app.listen(port, () => {
-    console.log(port + 'is listening...');
+    console.log('port ' + port + ' is listening...');
 });
 
 // websocket
